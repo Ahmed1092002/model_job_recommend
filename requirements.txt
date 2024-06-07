@@ -12,3 +12,4 @@ MarkupSafe==2.1.3           # HTML/XML escaping library
 gunicorn==20.0.4            # WSGI HTTP server for Flask
 sqlalchemy==2.0.19          # SQL toolkit and ORM
 joblib==1.2.0               # Parallel computing
+#modeljobrecommend-production.up.railway.app
