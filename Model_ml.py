@@ -50,7 +50,7 @@ class JobRecommender:
 
         # Load data from the database
         query = "SELECT * FROM Jobs"
-        self.df = pd.read_sql_query(query, self.conn)
+        self.df = pd.read_sql(query, self.conn)
         self.df = self.df[self.df['IsView'] == True]
         self.df['All'] = self.df.loc[:, self.df.columns != 'JobID'].apply(lambda x: ' '.join(x.astype(str)), axis=1)
 
