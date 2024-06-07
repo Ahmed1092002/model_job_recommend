@@ -1,0 +1,14 @@
+Flask==2.2.5                # Web framework for the app
+Werkzeug==2.2.3             # WSGI utility library for Flask
+pandas==2.0.3               # Data manipulation and analysis
+numpy==1.24.3               # Numerical computing
+nltk==3.8.1                 # Natural Language Toolkit for NLP
+PyPDF2==3.0.1               # PDF processing
+scikit-learn==1.3.0         # Machine learning library
+requests==2.31.0            # HTTP library for requests
+pyodbc==4.0.39              # ODBC connections for databases
+Jinja2==3.1.2               # Templating engine for Flask
+MarkupSafe==2.1.3           # HTML/XML escaping library
+gunicorn==20.0.4            # WSGI HTTP server for Flask
+sqlalchemy==2.0.19          # SQL toolkit and ORM
+joblib==1.2.0               # Parallel computing
