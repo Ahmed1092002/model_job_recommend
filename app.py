@@ -28,7 +28,6 @@
 #     run_simple('localhost', 5000, app)
 
 
-
 from flask import Flask, request, jsonify
 from Model_ml import JobRecommender
 
@@ -49,4 +48,4 @@ def upload_file():
     return jsonify(recommendations)
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000)
+    app.run(host='0.0.0.0', port=5000)

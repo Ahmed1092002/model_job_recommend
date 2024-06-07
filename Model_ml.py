@@ -12,13 +12,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import MinMaxScaler
-from sqlalchemy import create_engine
 from joblib import Parallel, delayed
 import urllib
 import requests
+from sqlalchemy.engine import Engine
 from io import BytesIO
-from flask import Flask, request, jsonify
+import logging
+from sqlalchemy import create_engine, text
 
+from flask import Flask, request, jsonify
+logging.basicConfig(level=logging.DEBUG)
 # Ensure NLTK dependencies are downloaded
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -26,6 +29,7 @@ nltk.download('wordnet')
 
 class JobRecommender:
     def __init__(self):
+        logging.debug("Initializing JobRecommender")
         self.f2 = open('stopwords.txt', 'r', errors='ignore')
         self.text2 = self.f2.read()
         self.stopwords_additional = word_tokenize(self.text2.replace("\n", " "))
@@ -40,19 +44,36 @@ class JobRecommender:
         self.df2['Salary'] = ["I"]
         self.df2['IsView'] = ["I"]
 
+        # Properly configure SQLAlchemy Engine
         params = urllib.parse.quote_plus(
             'DRIVER={ODBC Driver 17 for SQL Server};'
             'SERVER=db5399.public.databaseasp.net;'
             'DATABASE=db5399;'
             'UID=db5399;'
             'PWD=5e@ZQ?2p8Wx!'
-        )
 
+        )
         connection_string = f"mssql+pyodbc:///?odbc_connect={params}"
+        logging.debug("Creating SQLAlchemy engine")
         engine = create_engine(connection_string)
 
-        query = "SELECT * FROM Jobs"
-        self.df = pd.read_sql_query(query, engine)
+
+        if isinstance(engine, Engine):
+            logging.debug("Engine created successfully")
+            try:
+                with engine.connect() as connection:
+                    logging.debug("Connection established")
+                    query = text("SELECT * FROM Jobs")
+                    result = connection.execute(query)
+                    logging.debug("Query executed successfully")
+                    self.df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            except Exception as e:
+                logging.error(f"Error executing query: {e}")
+                raise
+        else:
+            logging.error("Failed to create a valid SQLAlchemy Engine")
+            raise ValueError("Invalid SQLAlchemy Engine configuration")
+
         self.df = self.df[self.df['IsView'] == True]
         self.df['All'] = self.df.loc[:, self.df.columns != 'JobID'].apply(lambda x: ' '.join(x.astype(str)), axis=1)
 
