@@ -12,11 +12,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import MinMaxScaler
-from sqlalchemy import create_engine
+import pymssql
 from joblib import Parallel, delayed
 import urllib
 import requests
 from io import BytesIO
+from flask import Flask, request, jsonify
 from flask import Flask, request, jsonify
 
 # Ensure NLTK dependencies are downloaded
@@ -40,19 +41,16 @@ class JobRecommender:
         self.df2['Salary'] = ["I"]
         self.df2['IsView'] = ["I"]
 
-        params = urllib.parse.quote_plus(
-            'DRIVER={ODBC Driver 17 for SQL Server};'
-            'SERVER=db5399.public.databaseasp.net;'
-            'DATABASE=db5399;'
-            'UID=db5399;'
-            'PWD=5e@ZQ?2p8Wx!'
-        )
+        # Establish a connection to the SQL Server database
+        server = 'db5399.public.databaseasp.net'
+        user = 'db5399'
+        password = '5e@ZQ?2p8Wx!'
+        database = 'db5399'
+        self.conn = pymssql.connect(server, user, password, database)
 
-        connection_string = f"mssql+pyodbc:///?odbc_connect={params}"
-        engine = create_engine(connection_string)
-
+        # Load data from the database
         query = "SELECT * FROM Jobs"
-        self.df = pd.read_sql_query(query, engine)
+        self.df = pd.read_sql_query(query, self.conn)
         self.df = self.df[self.df['IsView'] == True]
         self.df['All'] = self.df.loc[:, self.df.columns != 'JobID'].apply(lambda x: ' '.join(x.astype(str)), axis=1)
 
