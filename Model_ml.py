@@ -17,7 +17,6 @@ from joblib import Parallel, delayed
 import urllib
 import requests
 from io import BytesIO
-import pyodbc
 from flask import Flask, request, jsonify
 
 # Ensure NLTK dependencies are downloaded
@@ -41,16 +40,19 @@ class JobRecommender:
         self.df2['Salary'] = ["I"]
         self.df2['IsView'] = ["I"]
 
-        server = 'db5399.public.databaseasp.net'
-        database = 'db5399'
-        username = 'db5399'
-        password = '5e@ZQ?2p8Wx!'
-        conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=' +
-                              server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+        params = urllib.parse.quote_plus(
+            'DRIVER={ODBC Driver 17 for SQL Server};'
+            'SERVER=db5399.public.databaseasp.net;'
+            'DATABASE=db5399;'
+            'UID=db5399;'
+            'PWD=5e@ZQ?2p8Wx!'
+        )
 
-        # Load data from the database
+        connection_string = f"mssql+pyodbc:///?odbc_connect={params}"
+        engine = create_engine(connection_string)
+
         query = "SELECT * FROM Jobs"
-        self.df = pd.read_sql(query, conn)
+        self.df = pd.read_sql_query(query, engine)
         self.df = self.df[self.df['IsView'] == True]
         self.df['All'] = self.df.loc[:, self.df.columns != 'JobID'].apply(lambda x: ' '.join(x.astype(str)), axis=1)
 
